@@ -12,42 +12,102 @@ public class ProductController : ControllerBase
     }
 
     [HttpGet]
-    public IActionResult GetAllProduct()
+    public ActionResult<GeneralResponse> GetAllProduct()
     {
-        List<Product> products = unitOfWork.Product.GetAll().ToList();
-        return Ok(products);
+        GeneralResponse response = new GeneralResponse();
+        List<ProductWithCategoryNameDTO> productsDto = new List<ProductWithCategoryNameDTO>();
+        List<Product> products = unitOfWork.Product.GetAll(IncludeProperites: "Category").ToList();
+        foreach (var item in products)
+        {
+            ProductWithCategoryNameDTO product = new ProductWithCategoryNameDTO();
+            product.Id = item.Id;
+            product.Name = item.Name;
+            product.Description = item.Description;
+            product.Price = item.Price;
+            product.Quantity = item.Quantity;
+            if (item.Category != null)
+                product.CategoryName = item.Category.Name;
+            productsDto.Add(product);
+        }
+        response.IsSuccess = true;
+        response.Data = productsDto;
+        return Ok(response);
     }
 
     [HttpGet("{id}")]
-    public IActionResult GetProductById(int id)
+    public ActionResult<GeneralResponse> GetProductById(int id)
     {
-        Product product = unitOfWork.Product.GetById(id);
-        return Ok(product);
+        GeneralResponse generalResponse = new GeneralResponse();
+        Product product = unitOfWork.Product.Get(i => i.Id == id, IncludeProperites: "Category");
+        if (product != null)
+        {
+            ProductWithCategoryNameDTO productDto = new ProductWithCategoryNameDTO();
+            productDto.Id = id;
+            productDto.Name = product.Name;
+            productDto.Description = product.Description;
+            productDto.Price = product.Price;
+            productDto.Quantity = product.Quantity;
+            if (product.Category != null)
+                productDto.CategoryName = product.Category.Name;
+            generalResponse.IsSuccess = true;
+            generalResponse.Data = productDto;
+            return Ok(generalResponse);
+        }
+        generalResponse.IsSuccess = false;
+        generalResponse.Data = "the id is not valid";
+        return NotFound(generalResponse);
     }
 
     [HttpPost]
-    public IActionResult AddProduct(Product product)
+    public IActionResult AddProduct(ProductTobeaddedDTO product)
     {
-        unitOfWork.Product.Add(product);
-        unitOfWork.Save();
-        return CreatedAtAction("GetProductById", new {id = product.Id},product);
+        if (product != null)
+        {
+            Product newproduct = new Product();
+            newproduct.Name = product.Name;
+            newproduct.Description = product.Description;
+            newproduct.Price = product.Price;
+            newproduct.Quantity = product.Quantity;
+            newproduct.CategoryId = product.CategoryId;
+            unitOfWork.Product.Add(newproduct);
+            unitOfWork.Save();
+            return CreatedAtAction("GetProductById", new { id = newproduct.Id }, product);
+        }
+        return BadRequest();
     }
 
-
     [HttpPut]
-    public IActionResult EditProduct(Product product)
+    public IActionResult EditProduct(ProductTobeupdatedDTO productdto)
     {
-        unitOfWork.Product.Update(product);
-        unitOfWork.Save();
-        return Ok(product);
+        var productfromdb = unitOfWork.Product.Get(i=>i.Id == productdto.Id);
+        if (productfromdb != null)
+        {
+            productfromdb.Name = productdto.Name;
+            productfromdb.Price = productdto.Price;
+            productfromdb.Quantity = productdto.Quantity;
+            productfromdb.Description = productdto.Description;
+            productfromdb.CategoryId = productdto.CategoryId;
+            unitOfWork.Save();
+            return Ok(productdto);
+        }
+        return NotFound();
     }
 
     [HttpDelete("{id}")]
-    public IActionResult DeleteProduct(int id)
+    public ActionResult<GeneralResponse> DeleteProduct(int id)
     {
-        Product product = unitOfWork.Product.GetById(id);
-        unitOfWork.Product.Delete(product);
-        unitOfWork.Save();
-        return NoContent();
+        GeneralResponse response = new GeneralResponse();
+        Product? product = unitOfWork.Product.GetById(id);
+        if (product != null)
+        {
+            unitOfWork.Product.Delete(product);
+            unitOfWork.Save();
+            response.IsSuccess = true;
+            response.Data = "the product is deleted succesfuly";
+            return Ok(response);
+        }
+        response.IsSuccess = false;
+        response.Data = "invalid id";
+        return NotFound(response);
     }
 }

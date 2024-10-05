@@ -1,4 +1,6 @@
-﻿namespace Store.Controllers
+﻿using Microsoft.AspNetCore.Http.HttpResults;
+
+namespace Store.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
@@ -14,56 +16,36 @@
         [HttpGet]
         public ActionResult<GeneralResponse> GetAllCategories()
         {
-            //List<Category> categories = unitOfWork.Category.GetAll(IncludeProperites: "Products").ToList();
-            //GeneralResponse generalResponse = new GeneralResponse();
-            //if (categories != null)
-            //{
-            //    List<CategoryWithListofProductsDTO> Categorieswithproductsname = new();
-            //    foreach (Category category in categories)
-            //    {
-            //        CategoryWithListofProductsDTO categoryWith = new CategoryWithListofProductsDTO();
-            //        categoryWith.Id = category.Id;
-            //        categoryWith.Name = category.Name;
-            //        if (category.Products != null)
-            //        {
-            //            foreach (var item in category.Products)
-            //            {
-            //                categoryWith.productNames.Add(item.Name);
-            //            }
-            //        }
-            //        Categorieswithproductsname.Add(categoryWith);
-            //    }
-
-            //    generalResponse.IsSuccess = true;
-            //    generalResponse.Data = Categorieswithproductsname;
-            //}
-            //else
-            //{
-            //    generalResponse.IsSuccess = false;
-            //    generalResponse.Data = "The Data is invalid";
-            //}
-            //return generalResponse;
-            var categories = unitOfWork.Category.GetAll(IncludeProperites: "Products").ToList();
-
-            var generalResponse = new GeneralResponse();
-
-            if (categories != null && categories.Any())
+            List<Category> categories = unitOfWork.Category.GetAll(IncludeProperites: "Products").ToList();
+            GeneralResponse generalResponse = new GeneralResponse();
+            if (categories != null)
             {
-                generalResponse.IsSuccess = true;
-                generalResponse.Data = categories.Select(category => new CategoryWithListofProductsDTO
+                List<CategoryWithListofProductsDTO> Categorieswithproductsname = new();
+                foreach (Category category in categories)
                 {
-                    Id = category.Id,
-                    Name = category.Name,
-                    productNames = category.Products?.Select(p => p.Name).ToList() ?? new List<string>()
-                }).ToList();
+                    CategoryWithListofProductsDTO categoryWith = new CategoryWithListofProductsDTO();
+                    categoryWith.Id = category.Id;
+                    categoryWith.Name = category.Name;
+                    if (category.Products != null)
+                    {
+                        foreach (var item in category.Products)
+                        {
+                            categoryWith.productNames.Add(item.Name);
+                        }
+                    }
+                    Categorieswithproductsname.Add(categoryWith);
+                }
+
+                generalResponse.IsSuccess = true;
+                generalResponse.Data = Categorieswithproductsname;
             }
             else
             {
                 generalResponse.IsSuccess = false;
-                generalResponse.Data = "The Data is invalid"; // Since this is an error, you can return a string here
+                generalResponse.Data = "The Data is invalid";
             }
-
             return generalResponse;
+
         }
 
         [HttpGet("{id}")]
@@ -76,12 +58,15 @@
                 CategoryWithListofProductsDTO categories = new();
                 categories.Id = id;
                 categories.Name = category.Name;
-                foreach (var item in category.Products)
+                if (category.Products != null)
                 {
-                    categories.productNames.Add(item.Name);
+                    foreach (var item in category.Products)
+                    {
+                        categories.productNames.Add(item.Name);
+                    }
+                    generalResponse.IsSuccess = true;
+                    generalResponse.Data = categories;
                 }
-                generalResponse.IsSuccess = true;
-                generalResponse.Data = categories;
             }
             else
             {
@@ -99,6 +84,24 @@
             generalResponse.IsSuccess = true;
             generalResponse.Data = category;
             return generalResponse;
+        }
+        [HttpPut]
+        public ActionResult<GeneralResponse> EditCategory(CategoryUpdateDto category)
+        {
+            GeneralResponse generalResponse = new GeneralResponse();
+            Category? categoryfromdb = unitOfWork.Category.GetById(category.Id);
+            if (categoryfromdb != null)
+            {
+                categoryfromdb.Name = category.Name;
+                unitOfWork.Category.Update(categoryfromdb);
+                unitOfWork.Save();
+                generalResponse.IsSuccess = true;
+                generalResponse.Data = category;
+                return Ok(generalResponse);
+            }
+            generalResponse.IsSuccess = false;
+            generalResponse.Data = "the id is not valid";
+            return NotFound(generalResponse);
         }
     }
 }
