@@ -61,4 +61,9 @@ public class Repository<T> : IRepository<T> where T : class
         T? entity = dbset.Find(id);
         return entity;
     }
+
+    public void RemoveRange(List<T> entities)
+    {
+       dbset.RemoveRange(entities);
+    }
 }
