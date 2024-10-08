@@ -1,4 +1,4 @@
-﻿namespace Store.Models.DTOS;
+﻿namespace Store.Models.DTOS.Category;
 
 public class CategoryUpdateDto
 {

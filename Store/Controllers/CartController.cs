@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Store.Models.DTOS.Cart;
+using Store.Models.DTOS.OrderDetail;
 
 namespace Store.Controllers
 {
@@ -60,15 +61,14 @@ namespace Store.Controllers
             }
             else
             {
-                List<GetCartwithproductsDTO> CartItems = new List<GetCartwithproductsDTO>();
+                List<Orderdetaildto> CartItems = new List<Orderdetaildto>();
                 
                 foreach(var item in cart)
                 {
-                    GetCartwithproductsDTO cartdto = new GetCartwithproductsDTO()
+                    Orderdetaildto cartdto = new Orderdetaildto()
                     {
                         ProductId = item.productId,
-                        ProductName = item.Product.Name,
-                        ProductPrice = item.Product.Price,
+                        Price = item.Product.Price,
                         Quantity = item.Quantity
                     };
                     CartItems.Add(cartdto);

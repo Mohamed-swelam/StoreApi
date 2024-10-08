@@ -7,9 +7,11 @@ global using Store.Models.Models;
 global using Store.DataAccess.Data;
 global using Store.DataAccess.Repositories.IRepositories;
 global using Store.DataAccess.Repositories;
-global using Store.Models.DTOS;
 global using Microsoft.AspNetCore.Mvc;
 global using System.IdentityModel.Tokens.Jwt;
 global using System.Security.Claims;
 global using Microsoft.AspNetCore.Authorization;
+global using Microsoft.OpenApi.Models;
+global using Store.Models;
+
 

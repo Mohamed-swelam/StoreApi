@@ -15,7 +15,7 @@ namespace Store.Models.Models
         public Product? Product { get; set; }
         [ForeignKey("OrderId")]
         public int OrderId { get; set; }
-        public Order order { get; set; }
+        public Order? order { get; set; }
         public int Quantity {  get; set; }
         public double Price {  get; set; }
 

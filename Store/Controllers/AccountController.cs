@@ -1,4 +1,6 @@
-﻿namespace Store.Controllers;
+﻿using Store.Models.DTOS.User;
+
+namespace Store.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]

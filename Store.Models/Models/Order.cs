@@ -16,6 +16,7 @@ namespace Store.Models.Models
         public DateTime OrderDate { get; set; }
         public double TotalPrice { get; set; }
         public string OrderStatus {  get; set; }
-        public ICollection<OrderDetail> OrderDetails { get; set; }
+        public string? sessionId { get; set; }
+        public ICollection<OrderDetail>? OrderDetails { get; set; }
     }
 }
