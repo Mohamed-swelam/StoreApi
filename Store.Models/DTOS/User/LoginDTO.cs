@@ -4,7 +4,9 @@ namespace Store.Models.DTOS.User
 {
     public class LoginDTO
     {
-        public string UserName { get; set; }
+        [EmailAddress]
+        [Required]
+        public string Email { get; set; }
         [DataType(DataType.Password)]
         public string Password { get; set; }
     }

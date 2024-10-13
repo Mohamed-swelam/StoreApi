@@ -8,4 +8,5 @@ public class Product
     public string Quantity {  get; set; }
     public int? CategoryId { get; set; }
     public Category? Category { get; set; }
+    public ICollection<Review> reviews { get; set; }
 }

@@ -17,7 +17,7 @@ public class Repository<T> : IRepository<T> where T : class
     }
     public void Add(T entity)
     {
-       dbset.Add(entity);
+        dbset.Add(entity);
     }
 
     public void Delete(T entity)
@@ -30,7 +30,7 @@ public class Repository<T> : IRepository<T> where T : class
         IQueryable<T> entity = dbset;
         if (!string.IsNullOrEmpty(IncludeProperites))
         {
-            foreach(var item in IncludeProperites.Split(',',StringSplitOptions.RemoveEmptyEntries))
+            foreach (var item in IncludeProperites.Split(',', StringSplitOptions.RemoveEmptyEntries))
             {
                 entity = entity.Include(item);
             }
@@ -46,7 +46,7 @@ public class Repository<T> : IRepository<T> where T : class
         {
             values = values.Where(expression);
         }
-        if(!string.IsNullOrEmpty(IncludeProperites))
+        if (!string.IsNullOrEmpty(IncludeProperites))
         {
             foreach (var item in IncludeProperites.Split(',', StringSplitOptions.RemoveEmptyEntries))
             {
@@ -64,6 +64,6 @@ public class Repository<T> : IRepository<T> where T : class
 
     public void RemoveRange(List<T> entities)
     {
-       dbset.RemoveRange(entities);
+        dbset.RemoveRange(entities);
     }
 }

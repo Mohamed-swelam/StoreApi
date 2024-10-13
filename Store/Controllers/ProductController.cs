@@ -81,7 +81,7 @@ public class ProductController : ControllerBase
     [HttpPut]
     public IActionResult EditProduct(ProductTobeupdatedDTO productdto)
     {
-        var productfromdb = unitOfWork.Product.Get(i=>i.Id == productdto.Id);
+        var productfromdb = unitOfWork.Product.Get(i => i.Id == productdto.Id);
         if (productfromdb != null)
         {
             productfromdb.Name = productdto.Name;
@@ -111,5 +111,46 @@ public class ProductController : ControllerBase
         response.IsSuccess = false;
         response.Data = "invalid id";
         return NotFound(response);
+    }
+
+    [HttpGet("Filtering")]
+    public ActionResult Filtering([FromQuery]ProductFilteringDTO ProductDto)
+    {
+        var productsFromDb= unitOfWork.Product.GetAll(IncludeProperites:"Category").ToList();
+        if (ModelState.IsValid) 
+        {
+            if(ProductDto.CategoryName != null)
+                productsFromDb = unitOfWork.Product.GetAll(e=>e.Category.Name == ProductDto.CategoryName
+                ,IncludeProperites:"Category").ToList();
+
+            if (ProductDto.minPrice != 0)
+                productsFromDb = unitOfWork.Product.GetAll(e => e.Price > ProductDto.minPrice,IncludeProperites:"Category").ToList();
+
+            if (ProductDto.maxPrice != 0)
+                productsFromDb = unitOfWork.Product.GetAll(e => e.Price < ProductDto.maxPrice, IncludeProperites: "Category").ToList();
+
+            if (ProductDto.KeyWord != null)
+                productsFromDb = unitOfWork.Product.GetAll(e => e.Name.Contains(ProductDto.KeyWord), IncludeProperites: "Category").ToList();
+
+            if (productsFromDb.Any())
+            {
+               List<ProductWithCategoryNameDTO> products = new List<ProductWithCategoryNameDTO>();
+                foreach(var item in productsFromDb)
+                {
+                    ProductWithCategoryNameDTO product = new();
+                    product.Name = item.Name;
+                    product.Price = item.Price;
+                    product.Description = item.Description;
+                    product.CategoryName = item.Category.Name;
+                    product.Price = item.Price;
+                    product.Quantity = item.Quantity;
+                    products.Add(product);
+                }
+                return Ok(products);
+            }
+            return NoContent();
+        }
+        return BadRequest();
+
     }
 }

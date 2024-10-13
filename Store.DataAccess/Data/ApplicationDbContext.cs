@@ -10,5 +10,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<OrderDetail> orderDetail { get; set; }
     public DbSet<Order> orders { get; set; }
     public DbSet<ShoppingCart> Shoppingcart { get; set; }
+    public DbSet<Review> reviews { get; set; }
+    public DbSet<ApplicationUser> applicationUsers { get; set; }
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }
 }

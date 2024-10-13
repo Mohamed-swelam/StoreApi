@@ -12,8 +12,8 @@ using Store.DataAccess.Data;
 namespace Store.DataAccess.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20241005201859_addorderandoderdetaulandshoppingcartmodel")]
-    partial class addorderandoderdetaulandshoppingcartmodel
+    [Migration("20241013002025_init")]
+    partial class init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -266,6 +266,9 @@ namespace Store.DataAccess.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
+                    b.Property<string>("sessionId")
+                        .HasColumnType("nvarchar(max)");
+
                     b.HasKey("Id");
 
                     b.HasIndex("UserId");
@@ -333,6 +336,40 @@ namespace Store.DataAccess.Migrations
                     b.HasIndex("CategoryId");
 
                     b.ToTable("Products");
+                });
+
+            modelBuilder.Entity("Store.Models.Models.Review", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Comment")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Rating")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("reviews");
                 });
 
             modelBuilder.Entity("Store.Models.Models.ShoppingCart", b =>
@@ -413,6 +450,43 @@ namespace Store.DataAccess.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Store.Models.Models.ApplicationUser", b =>
+                {
+                    b.OwnsMany("Store.Models.Models.RefreshToken", "refreshTokens", b1 =>
+                        {
+                            b1.Property<string>("ApplicationUserId")
+                                .HasColumnType("nvarchar(450)");
+
+                            b1.Property<int>("Id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("int");
+
+                            SqlServerPropertyBuilderExtensions.UseIdentityColumn(b1.Property<int>("Id"));
+
+                            b1.Property<DateTime>("Created")
+                                .HasColumnType("datetime2");
+
+                            b1.Property<DateTime>("Expires")
+                                .HasColumnType("datetime2");
+
+                            b1.Property<DateTime?>("Revoked")
+                                .HasColumnType("datetime2");
+
+                            b1.Property<string>("Token")
+                                .IsRequired()
+                                .HasColumnType("nvarchar(max)");
+
+                            b1.HasKey("ApplicationUserId", "Id");
+
+                            b1.ToTable("RefreshToken");
+
+                            b1.WithOwner()
+                                .HasForeignKey("ApplicationUserId");
+                        });
+
+                    b.Navigation("refreshTokens");
+                });
+
             modelBuilder.Entity("Store.Models.Models.Order", b =>
                 {
                     b.HasOne("Store.Models.Models.ApplicationUser", "User")
@@ -452,6 +526,25 @@ namespace Store.DataAccess.Migrations
                     b.Navigation("Category");
                 });
 
+            modelBuilder.Entity("Store.Models.Models.Review", b =>
+                {
+                    b.HasOne("Store.Models.Models.Product", "Product")
+                        .WithMany("reviews")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Store.Models.Models.ApplicationUser", "User")
+                        .WithMany("reviews")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Store.Models.Models.ShoppingCart", b =>
                 {
                     b.HasOne("Store.Models.Models.ApplicationUser", "User")
@@ -474,6 +567,8 @@ namespace Store.DataAccess.Migrations
             modelBuilder.Entity("Store.Models.Models.ApplicationUser", b =>
                 {
                     b.Navigation("orders");
+
+                    b.Navigation("reviews");
                 });
 
             modelBuilder.Entity("Store.Models.Models.Category", b =>
@@ -484,6 +579,11 @@ namespace Store.DataAccess.Migrations
             modelBuilder.Entity("Store.Models.Models.Order", b =>
                 {
                     b.Navigation("OrderDetails");
+                });
+
+            modelBuilder.Entity("Store.Models.Models.Product", b =>
+                {
+                    b.Navigation("reviews");
                 });
 #pragma warning restore 612, 618
         }
