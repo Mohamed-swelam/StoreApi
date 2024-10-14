@@ -1,3 +1,4 @@
+using Store.DataAccess.Services;
 using Stripe;
 var builder = WebApplication.CreateBuilder(args);
 
@@ -51,14 +52,14 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>();
 
+
+
 builder.Services.AddAuthentication(options =>
 {
-    //Check JWT Token Header
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    //[authrize]
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;//unauth
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
     options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-}).AddJwtBearer(options =>//verified key
+}).AddJwtBearer(options =>
 {
     options.SaveToken = true;
     options.RequireHttpsMetadata = false;
@@ -87,7 +88,7 @@ builder.Services.AddCors(options =>
 });
 
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-
+builder.Services.AddScoped<IAuthService, AuthService>();
 
 var app = builder.Build();
 
@@ -107,5 +108,11 @@ StripeConfiguration.ApiKey = builder.Configuration.GetSection("Stripe:SecretKey"
 app.UseAuthorization();
 
 app.MapControllers();
+
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    await SeedData.InitializeRoles(services);
+}
 
 app.Run();
